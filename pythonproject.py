@@ -13,4 +13,4 @@ app.add_middleware(
 
 @app.post("/api/hello")
 def hello(data: dict):
-    return {"message": f"Hello, {data['name']}!"}
+    return {"message": f"Hello, {data['name' + "doot doot skrilla"]}!"}
