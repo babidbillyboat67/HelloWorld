@@ -1,76 +1,440 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>My HTML Website</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 30px;
-            background: #f5f5f5;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backend Workbench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef3f8;
+    --grid-line: #d7e2ec;
+    --card: #ffffff;
+    --ink: #1c2b3a;
+    --ink-soft: #5b6b7b;
+    --amber: #f2994a;
+    --amber-deep: #d97a1f;
+    --green: #2f9e6e;
+    --green-bg: #e6f6ee;
+    --gray-bg: #eef0f2;
+    --red: #d4533f;
+    --red-bg: #fbeae6;
+    --border: #d7e2ec;
+  }
 
-        .card {
-            background: white;
-            padding: 20px;
-            width: 350px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
+  * { box-sizing: border-box; }
 
-        input,
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 16px;
-        }
+  body {
+    margin: 0;
+    background-color: var(--bg);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    padding: 48px 24px 80px;
+  }
 
-        button {
-            background: #0078ff;
-            border: none;
-            color: white;
-            cursor: pointer;
-        }
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+  }
 
-        button:hover {
-            background: #005ecc;
-        }
-    </style>
+  header {
+    margin-bottom: 40px;
+  }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--amber-deep);
+    margin: 0 0 10px;
+  }
+
+  h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 38px;
+    line-height: 1.15;
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
+  }
+
+  header p {
+    color: var(--ink-soft);
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 0;
+  }
+
+  header code {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: 1fr; }
+    h1 { font-size: 30px; }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 1px 2px rgba(28, 43, 58, 0.04);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .card-title .icon {
+    font-size: 20px;
+  }
+
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    padding: 4px 9px;
+    border-radius: 100px;
+    white-space: nowrap;
+    background: var(--gray-bg);
+    color: var(--ink-soft);
+    border: 1px solid var(--border);
+  }
+
+  .badge.ok {
+    background: var(--green-bg);
+    color: var(--green);
+    border-color: #c3ead8;
+  }
+
+  .badge.err {
+    background: var(--red-bg);
+    color: var(--red);
+    border-color: #f3d4cc;
+  }
+
+  .spec {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    background: #f7fafc;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  input[type="text"], input[type="number"] {
+    flex: 1;
+    min-width: 80px;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    background: #fbfdff;
+  }
+
+  input:focus, button:focus {
+    outline: 2px solid var(--amber);
+    outline-offset: 1px;
+  }
+
+  button {
+    padding: 9px 16px;
+    border: none;
+    border-radius: 6px;
+    background: var(--ink);
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  button:hover {
+    background: #314556;
+  }
+
+  .output {
+    min-height: 22px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .output .placeholder {
+    color: var(--ink-soft);
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  .swatch {
+    width: 100%;
+    height: 36px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--gray-bg);
+  }
+
+  footer {
+    margin-top: 40px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+</style>
 </head>
-
 <body>
 
-    <div class="card">
-        <h2>Welcome</h2>
-        <p>Enter your name and send it to the FastAPI backend.</p>
+<div class="wrap">
 
-        <form id="myForm">
-            <input type="text" id="nameInput" placeholder="Your name">
-            <button type="submit">Send</button>
-        </form>
+  <header>
+    <p class="eyebrow">Backend Workbench</p>
+    <h1>Six features.<br>Zero working endpoints.</h1>
+    <p>Every card below already has its frontend wired up and is trying to call a FastAPI route that doesn't exist yet. Add each endpoint to <code>pythonproject.py</code>, save (uvicorn <code>--reload</code> will pick it up), and the status badge on that card will flip from <strong>not wired up</strong> to <strong>connected</strong>.</p>
+  </header>
 
-        <p id="response"></p>
+  <div class="grid">
+
+    <!-- 1. Dice Roller -->
+    <div class="card" id="card-roll">
+      <div class="card-head">
+        <div class="card-title"><span class="icon">🎲</span> Dice Roller</div>
+        <span class="badge" id="badge-roll">not wired up</span>
+      </div>
+      <div class="spec">GET /api/roll
+&rarr; { "result": &lt;int 1-6&gt; }</div>
+      <div class="controls">
+        <button id="btn-roll">Roll the dice</button>
+      </div>
+      <div class="output" id="out-roll"><span class="placeholder">Result shows up here</span></div>
     </div>
 
-    <script>
-        document.getElementById("myForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
+    <!-- 2. Random joke/fact -->
+    <div class="card" id="card-joke">
+      <div class="card-head">
+        <div class="card-title"><span class="icon">😄</span> Random Joke</div>
+        <span class="badge" id="badge-joke">not wired up</span>
+      </div>
+      <div class="spec">GET /api/joke
+&rarr; { "joke": "&lt;string&gt;" }
+(pick randomly from a list of a few jokes)</div>
+      <div class="controls">
+        <button id="btn-joke">Tell me something</button>
+      </div>
+      <div class="output" id="out-joke"><span class="placeholder">Joke shows up here</span></div>
+    </div>
 
-            const name = document.getElementById("nameInput").value;
+    <!-- 3. Adder -->
+    <div class="card" id="card-add">
+      <div class="card-head">
+        <div class="card-title"><span class="icon">➕</span> Adder</div>
+        <span class="badge" id="badge-add">not wired up</span>
+      </div>
+      <div class="spec">POST /api/add
+body: { "a": &lt;number&gt;, "b": &lt;number&gt; }
+&rarr; { "result": &lt;number&gt; }</div>
+      <div class="controls">
+        <input type="number" id="add-a" placeholder="a" value="4">
+        <input type="number" id="add-b" placeholder="b" value="7">
+        <button id="btn-add">Add 'em up</button>
+      </div>
+      <div class="output" id="out-add"><span class="placeholder">Sum shows up here</span></div>
+    </div>
 
-            const res = await fetch("http://127.0.0.1:8000/api/hello", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name })
-            });
+    <!-- 4. Word reverser -->
+    <div class="card" id="card-reverse">
+      <div class="card-head">
+        <div class="card-title"><span class="icon">🔤</span> Word Reverser</div>
+        <span class="badge" id="badge-reverse">not wired up</span>
+      </div>
+      <div class="spec">POST /api/reverse
+body: { "text": "&lt;string&gt;" }
+&rarr; { "reversed": "&lt;string&gt;" }</div>
+      <div class="controls">
+        <input type="text" id="reverse-text" placeholder="Type something" value="hello world">
+        <button id="btn-reverse">Flip it</button>
+      </div>
+      <div class="output" id="out-reverse"><span class="placeholder">Reversed text shows up here</span></div>
+    </div>
 
-            const data = await res.json();
-            document.getElementById("response").innerText = data.message;
-        });
-    </script>
+    <!-- 5. Temp converter -->
+    <div class="card" id="card-convert">
+      <div class="card-head">
+        <div class="card-title"><span class="icon">🌡️</span> Temp Converter</div>
+        <span class="badge" id="badge-convert">not wired up</span>
+      </div>
+      <div class="spec">POST /api/convert
+body: { "fahrenheit": &lt;number&gt; }
+&rarr; { "celsius": &lt;number&gt; }</div>
+      <div class="controls">
+        <input type="number" id="convert-f" placeholder="°F" value="98.6">
+        <button id="btn-convert">Convert</button>
+      </div>
+      <div class="output" id="out-convert"><span class="placeholder">Celsius shows up here</span></div>
+    </div>
+
+    <!-- 6. Random color -->
+    <div class="card" id="card-color">
+      <div class="card-head">
+        <div class="card-title"><span class="icon">🎨</span> Random Color</div>
+        <span class="badge" id="badge-color">not wired up</span>
+      </div>
+      <div class="spec">GET /api/color
+&rarr; { "color": "#rrggbb" }
+(generate 3 random bytes, format as hex)</div>
+      <div class="controls">
+        <button id="btn-color">Surprise me</button>
+      </div>
+      <div class="swatch" id="swatch-color"></div>
+      <div class="output" id="out-color"><span class="placeholder">#hexcode shows up here</span></div>
+    </div>
+
+  </div>
+
+  <footer>backend base url: http://127.0.0.1:8000</footer>
+
+</div>
+
+<script>
+  const BASE_URL = "http://127.0.0.1:8000";
+
+  function setBadge(id, state) {
+    const el = document.getElementById(id);
+    el.classList.remove("ok", "err");
+    if (state === "ok") {
+      el.classList.add("ok");
+      el.textContent = "connected";
+    } else if (state === "err") {
+      el.classList.add("err");
+      el.textContent = "check endpoint";
+    } else {
+      el.textContent = "not wired up";
+    }
+  }
+
+  async function callApi(path, options, badgeId) {
+    try {
+      const res = await fetch(BASE_URL + path, options);
+      if (!res.ok) {
+        setBadge(badgeId, "err");
+        return { error: `Server responded with ${res.status}` };
+      }
+      const data = await res.json();
+      setBadge(badgeId, "ok");
+      return data;
+    } catch (err) {
+      setBadge(badgeId, "err");
+      return { error: "Could not reach the server. Is uvicorn running?" };
+    }
+  }
+
+  // 1. Dice roller
+  document.getElementById("btn-roll").addEventListener("click", async () => {
+    const out = document.getElementById("out-roll");
+    out.innerHTML = "Rolling...";
+    const data = await callApi("/api/roll", { method: "GET" }, "badge-roll");
+    out.textContent = data.error ? data.error : `You rolled a ${data.result}`;
+  });
+
+  // 2. Random joke
+  document.getElementById("btn-joke").addEventListener("click", async () => {
+    const out = document.getElementById("out-joke");
+    out.innerHTML = "Thinking...";
+    const data = await callApi("/api/joke", { method: "GET" }, "badge-joke");
+    out.textContent = data.error ? data.error : data.joke;
+  });
+
+  // 3. Adder
+  document.getElementById("btn-add").addEventListener("click", async () => {
+    const a = Number(document.getElementById("add-a").value);
+    const b = Number(document.getElementById("add-b").value);
+    const out = document.getElementById("out-add");
+    const data = await callApi("/api/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ a, b })
+    }, "badge-add");
+    out.textContent = data.error ? data.error : `${a} + ${b} = ${data.result}`;
+  });
+
+  // 4. Word reverser
+  document.getElementById("btn-reverse").addEventListener("click", async () => {
+    const text = document.getElementById("reverse-text").value;
+    const out = document.getElementById("out-reverse");
+    const data = await callApi("/api/reverse", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    }, "badge-reverse");
+    out.textContent = data.error ? data.error : data.reversed;
+  });
+
+  // 5. Temp converter
+  document.getElementById("btn-convert").addEventListener("click", async () => {
+    const fahrenheit = Number(document.getElementById("convert-f").value);
+    const out = document.getElementById("out-convert");
+    const data = await callApi("/api/convert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fahrenheit })
+    }, "badge-convert");
+    out.textContent = data.error ? data.error : `${fahrenheit}°F = ${data.celsius}°C`;
+  });
+
+  // 6. Random color
+  document.getElementById("btn-color").addEventListener("click", async () => {
+    const out = document.getElementById("out-color");
+    const swatch = document.getElementById("swatch-color");
+    const data = await callApi("/api/color", { method: "GET" }, "badge-color");
+    if (data.error) {
+      out.textContent = data.error;
+    } else {
+      out.textContent = data.color;
+      swatch.style.background = data.color;
+    }
+  });
+</script>
 
 </body>
-
 </html>
