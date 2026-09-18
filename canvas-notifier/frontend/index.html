@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canvas Notifier</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#1c2b3a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Canvas Notifier</p>
+    <h1>Never miss a due date.</h1>
+    <p>Connects to your Canvas account and pushes a notification to your phone when an assignment or test is coming due.</p>
+  </header>
+
+  <div class="card" id="setup-card">
+    <form id="setup-form">
+      <label>
+        Your name
+        <span class="hint">Just for the greeting — nothing is shared.</span>
+        <input type="text" id="name" required placeholder="Jamie">
+      </label>
+      <label>
+        Canvas URL
+        <span class="hint">e.g. https://yourschool.instructure.com</span>
+        <input type="url" id="canvas-url" required placeholder="https://yourschool.instructure.com">
+      </label>
+      <label>
+        Canvas access token
+        <span class="hint">Canvas &rarr; Account &rarr; Settings &rarr; "+ New Access Token". Stored only on this server, never shared.</span>
+        <input type="password" id="canvas-token" required placeholder="paste your token">
+      </label>
+      <button type="submit">Connect Canvas</button>
+      <div class="status" id="setup-status"></div>
+    </form>
+  </div>
+
+  <div class="card" id="dashboard-card" hidden>
+    <div class="row" style="justify-content: space-between; align-items: center;">
+      <p id="greeting" style="margin:0; font-weight:600;"></p>
+      <button class="secondary" id="switch-user">Switch account</button>
+    </div>
+
+    <div class="row">
+      <button id="enable-notifications">Enable notifications on this phone</button>
+      <button class="secondary" id="refresh-list">Refresh</button>
+    </div>
+    <div class="status" id="notif-status"></div>
+
+    <p class="section-title">Coming up</p>
+    <ul id="assignment-list"></ul>
+  </div>
+
+  <footer>
+    backend: <span id="backend-url-label"></span> &middot;
+    install this page ("Add to Home Screen") to get real push notifications on your phone
+  </footer>
+
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  document.getElementById("backend-url-label").textContent = window.CANVAS_NOTIFIER_BACKEND_URL;
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+</script>
+
+</body>
+</html>

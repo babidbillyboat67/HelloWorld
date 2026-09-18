@@ -23,6 +23,7 @@ env/
 # Environment variables
 .env
 .env.*
+!.env.example
 
 # OS-specific files
 .DS_Store
