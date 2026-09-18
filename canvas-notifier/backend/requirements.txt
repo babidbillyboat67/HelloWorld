@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+httpx
+pywebpush
+apscheduler
+python-dotenv
+pytest
