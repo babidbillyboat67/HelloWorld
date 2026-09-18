@@ -69,7 +69,7 @@
 <script src="config.js"></script>
 <script src="app.js"></script>
 <script>
-  document.getElementById("backend-url-label").textContent = window.CANVAS_NOTIFIER_BACKEND_URL;
+  document.getElementById("backend-url-label").textContent = window.CANVAS_NOTIFIER_BACKEND_URL || window.location.origin;
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }

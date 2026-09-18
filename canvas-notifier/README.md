@@ -3,16 +3,11 @@
 A small app that syncs to Canvas LMS and sends real push notifications to a
 student's phone before their assignments and tests are due.
 
-It's two pieces:
-
-- **`backend/`** — a FastAPI service that logs into Canvas on the student's
-  behalf, polls for upcoming assignments/tests, and sends
-  [Web Push](https://developer.mozilla.org/en-US/docs/Web/API/Push_API)
-  notifications on a schedule.
-- **`frontend/`** — a installable PWA (Progressive Web App). A student opens
-  it once, adds it to their phone's home screen, and taps "enable
-  notifications" — no app store needed, and it works on both Android and iOS
-  16.4+.
+It's one FastAPI service (`backend/`) that both talks to Canvas and serves
+the installable PWA (`frontend/`) — so there's a single process and a single
+URL to deploy. A student opens that URL once, adds it to their phone's home
+screen, and taps "enable notifications" — no app store needed, and it works
+on both Android and iOS 16.4+.
 
 ## How the reminders work
 
@@ -31,77 +26,58 @@ assignments endpoint Canvas uses, so they're included automatically and
 labeled "Test" instead of "Assignment" (based on submission type / keywords
 in the title — see `classify_assignment` in `backend/canvas_client.py`).
 
-## 1. Set up the backend
+## 1. Get a Canvas access token
+
+In Canvas: **Account → Settings → scroll to "Approved Integrations" →
+"+ New Access Token"**. Give it any purpose name and generate it — you'll
+paste this into the app's setup form later. It's stored only in the
+backend's local SQLite database (`backend/canvas_notifier.db`, gitignored)
+and used solely to read your own assignments.
+
+## 2. Run it locally (to try it out)
 
 ```bash
 cd canvas-notifier/backend
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-```
-
-Generate a VAPID key pair (this is what lets the backend push notifications
-without a third-party service like Firebase):
-
-```bash
-python generate_vapid_keys.py
-```
-
-Copy `.env.example` to `.env` and paste in the printed keys:
-
-```bash
-cp .env.example .env
-# then edit .env and fill in VAPID_PRIVATE_KEY / VAPID_PUBLIC_KEY
-```
-
-Run it:
-
-```bash
+python generate_vapid_keys.py        # prints a VAPID key pair
+cp .env.example .env                 # then paste those keys into .env
 uvicorn app:app --reload --port 8000
+pytest                               # optional: run the test suite
 ```
 
-Run the test suite:
+Open `http://127.0.0.1:8000` in a browser — the same service now serves
+both the API and the app itself, so there's nothing else to run.
 
-```bash
-pytest
-```
+## 3. Put it on an actual phone
 
-## 2. Set up the frontend
+Browsers only allow push notifications over HTTPS (`localhost` is
+exempted, but a phone on your Wi-Fi hitting your laptop's IP is not), so you
+need to deploy `backend/` somewhere with a real HTTPS URL. **Render's free
+tier** is the least fussy way to do this — no server to maintain, and it
+gives you HTTPS automatically:
 
-The frontend is static files, but service workers (needed for push) require
-being served over HTTP(S), not opened as a `file://` page.
+1. Push this repo to GitHub (already done if you're reading this from the
+   repo).
+2. At [render.com](https://render.com), **New +** → **Web Service** → connect
+   this repo.
+3. Set:
+   - **Root Directory**: `canvas-notifier/backend`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app:app --host 0.0.0.0 --port $PORT`
+4. Under **Environment**, add the variables from `generate_vapid_keys.py`'s
+   output: `VAPID_PRIVATE_KEY`, `VAPID_PUBLIC_KEY`, `VAPID_CLAIMS_EMAIL`
+   (don't commit these — set them in Render's dashboard, not in `.env`).
+5. Deploy. Render gives you a URL like `https://your-app.onrender.com`.
+6. On your phone, open that URL, then use the browser's **"Add to Home
+   Screen"** (Safari, iOS 16.4+) or **"Install app"** (Chrome, Android)
+   option.
+7. Open the installed app, connect your Canvas account, and tap **"Enable
+   notifications on this phone"**.
 
-```bash
-cd canvas-notifier/frontend
-python3 -m http.server 8090
-```
-
-If your backend isn't at the default `http://127.0.0.1:8000`, edit
-`frontend/config.js` and change `CANVAS_NOTIFIER_BACKEND_URL`.
-
-Open `http://127.0.0.1:8090` in a browser to try it locally.
-
-### Putting it on an actual phone
-
-Browsers only allow push notifications over HTTPS (localhost is exempted,
-a phone on your Wi-Fi is not). To try this on a real phone:
-
-1. Deploy `backend/` somewhere reachable over HTTPS (Render, Fly.io, a VPS
-   behind a reverse proxy, etc.) and point `frontend/config.js` at that URL.
-2. Deploy `frontend/` as static files behind HTTPS too (Netlify, Vercel,
-   GitHub Pages, or served by the same host as the backend).
-3. On the phone, open the frontend URL in the browser, then use the
-   browser's "Add to Home Screen" / "Install app" option.
-4. Open the installed app, connect your Canvas account, and tap "Enable
-   notifications on this phone".
-
-## 3. Getting a Canvas access token
-
-In Canvas: **Account → Settings → scroll to "Approved Integrations" →
-"+ New Access Token"**. Give it any purpose name and generate it. Paste that
-token (and your Canvas URL, e.g. `https://yourschool.instructure.com`) into
-the app's setup form — it's stored only in the backend's local SQLite
-database (`backend/canvas_notifier.db`, gitignored) and used solely to read
-your own assignments.
+Any other host that runs a Python web service behind HTTPS (Fly.io, a VPS
+with a reverse proxy, etc.) works the same way — the important parts are
+the env vars and serving over HTTPS.
 
 ## Known limitations
 

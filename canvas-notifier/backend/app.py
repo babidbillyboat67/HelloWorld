@@ -7,10 +7,12 @@ a notification when an assignment or test is coming due.
 
 import logging
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 import canvas_client
@@ -99,3 +101,11 @@ def assignments(user_id: int):
     except canvas_client.CanvasError as exc:
         raise HTTPException(status_code=502, detail=str(exc))
     return {"items": items}
+
+
+# Serve the PWA itself from this same service, so a deployment only needs one
+# URL and never has to deal with cross-origin push subscriptions. Mounted
+# last so it never shadows the /api/* routes above.
+_FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+if _FRONTEND_DIR.is_dir():
+    app.mount("/", StaticFiles(directory=str(_FRONTEND_DIR), html=True), name="frontend")

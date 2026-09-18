@@ -1,4 +1,4 @@
-const BACKEND_URL = window.CANVAS_NOTIFIER_BACKEND_URL || "http://127.0.0.1:8000";
+const BACKEND_URL = window.CANVAS_NOTIFIER_BACKEND_URL || window.location.origin;
 const USER_ID_KEY = "canvasNotifier.userId";
 const USER_NAME_KEY = "canvasNotifier.userName";
 
